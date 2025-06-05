@@ -12,6 +12,6 @@ class User(SQLModel, table=True):
     password_hash: str
     name: str
 
-    rooms: list["Room"] = Relationship(back_populates="users", link_model=RoomMembership)
+    rooms: List["Room"] = Relationship(back_populates="users", link_model=RoomMembership)
 
     

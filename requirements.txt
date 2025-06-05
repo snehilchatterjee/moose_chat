@@ -1,0 +1,10 @@
+fastapi
+sqlalchemy
+passlib
+sqlmodel
+bcrypt==4.0.1
+python-jose
+pyjwt
+alembic
+psycopg2
+datetime
