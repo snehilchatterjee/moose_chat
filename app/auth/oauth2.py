@@ -69,20 +69,12 @@ async def verify_token(token: str) -> User:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]) # Pass ALGORITHM as a list
         username: str = payload.get("sub")
         password_hash=payload.get("pwd_hash")
-        if username is None or authenticate_user(username,password_hash,session) is None:
+        auth_result = await authenticate_user(username, password_hash, session)
+        if not auth_result:
             raise credentials_exception
-    except InvalidTokenError:
-        raise credentials_exception
-    
-    try:
-        user_query = select(User).where(User.username == username)
-        result = await session.exec(user_query)
-        user = result.first()
-        
-        if user is None:
-            raise credentials_exception
+        user, _ = auth_result
         return user
-    except Exception: 
+    except InvalidTokenError:
         raise credentials_exception
     finally:
         try:
