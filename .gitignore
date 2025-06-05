@@ -1,0 +1,28 @@
+# IDE settings
+.vscode/
+.history/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# Temporary/system files
+*.tmp
+*.log
+*.bak
+*.swp
+*.DS_Store
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Node.js / Frontend
+node_modules/
+dist/
+build/
+coverage/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
