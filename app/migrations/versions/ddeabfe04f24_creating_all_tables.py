@@ -1,8 +1,8 @@
-"""empty message
+"""creating all tables
 
-Revision ID: 19233b7b5a8f
-Revises: d203e8424e8c
-Create Date: 2025-06-05 19:52:47.580912
+Revision ID: ddeabfe04f24
+Revises: 
+Create Date: 2025-06-07 12:42:22.449489
 
 """
 from typing import Sequence, Union
@@ -14,8 +14,8 @@ from sqlmodel import SQLModel
 
 
 # revision identifiers, used by Alembic.
-revision: str = '19233b7b5a8f'
-down_revision: Union[str, None] = 'd203e8424e8c'
+revision: str = 'ddeabfe04f24'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -31,6 +31,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_room_name'), 'room', ['name'], unique=True)
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('password_hash', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
     op.create_table('message',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('room_id', sa.Integer(), nullable=False),
@@ -38,7 +46,7 @@ def upgrade() -> None:
     sa.Column('content', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('timestamp', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.ForeignKeyConstraint(['room_id'], ['room.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_message_room_id'), 'message', ['room_id'], unique=False)
@@ -47,7 +55,7 @@ def upgrade() -> None:
     sa.Column('room_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['room_id'], ['room.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('room_id', 'user_id')
     )
     # ### end Alembic commands ###
@@ -60,6 +68,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_message_user_id'), table_name='message')
     op.drop_index(op.f('ix_message_room_id'), table_name='message')
     op.drop_table('message')
+    op.drop_index(op.f('ix_users_username'), table_name='users')
+    op.drop_table('users')
     op.drop_index(op.f('ix_room_name'), table_name='room')
     op.drop_table('room')
     # ### end Alembic commands ###

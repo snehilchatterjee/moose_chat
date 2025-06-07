@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from app.schema.token import Token, TokenData
 from sqlmodel.ext.asyncio.session import AsyncSession
 from datetime import timedelta, timezone, datetime 
-from app.models.user import User
+from app.models.user import Users
 from sqlmodel import select
 from app.core.crypto import verify_hash
 from app.core.config import settings
@@ -17,7 +17,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 async def authenticate_user(username: str,password: str,session: AsyncSession):
-    user=(await session.exec(select(User).where(User.username==username))).first()
+    user=(await session.exec(select(Users).where(Users.username==username))).first()
     if not user:
         return None
     if not verify_hash(password,user.password_hash):
@@ -50,13 +50,13 @@ async def get_current_user(token: str=Depends(oauth2_scheme),session: AsyncSessi
         token_data=TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
-    user = (await session.exec(select(User).where(User.username==token_data.username))).first()
+    user = (await session.exec(select(Users).where(Users.username==token_data.username))).first()
     if user is None:
         raise credentials_exception
     return user
 
 
-async def verify_token(token: str) -> User:
+async def verify_token(token: str) -> Users:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials or user not found",
@@ -93,4 +93,4 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm=Depends(),
     access_token: str=create_access_token(
         data={"sub":user.username, "pwd_hash":password_hash}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token,token_type="bearer")
+    return Token(access_token=access_token,token_type="bearer",uid=user.id)

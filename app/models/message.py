@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class Message(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     room_id: int = Field(foreign_key="room.id", index=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
+    user_id: int = Field(foreign_key="users.id", index=True)
     content: str
     timestamp: str= Field(default_factory=lambda: datetime.now().isoformat())
 
