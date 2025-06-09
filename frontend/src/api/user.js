@@ -7,8 +7,7 @@ export async function loginUser({ username, password }) {
     body: new URLSearchParams({ username, password }),
   });
   const data = await res.json();
-  console.log("Login response:", data);
-  return { success: !!data.token, message: data.message || "Login successful" };
+  return { success: !!data.access_token, message: data.message || "Login successful" };
 }
 
 export async function registerUser({ name, username, password }) {

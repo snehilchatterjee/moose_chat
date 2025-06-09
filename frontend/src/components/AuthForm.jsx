@@ -18,10 +18,11 @@ export default function AuthForm() {
       const res = isRegistering
         ? await registerUser(formData)
         : await loginUser(formData);
+      console.log("Response:", res);
       if (res.success) {
         alert(res.message);
-        if (isRegistering) setIsRegistering(false);
         navigate("/home");
+        if (isRegistering) setIsRegistering(false);
       } else {
         setError(res.message);
       }
