@@ -20,7 +20,9 @@ export default function AuthForm() {
         : await loginUser(formData);
       console.log("Response:", res);
       if (res.success) {
-        alert(res.message);
+        const token = res.response.access_token;
+        // store the token in localStorage
+        localStorage.setItem("token", token);
         navigate("/home");
         if (isRegistering) setIsRegistering(false);
       } else {

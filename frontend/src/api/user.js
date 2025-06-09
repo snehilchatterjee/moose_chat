@@ -7,7 +7,7 @@ export async function loginUser({ username, password }) {
     body: new URLSearchParams({ username, password }),
   });
   const data = await res.json();
-  return { success: !!data.access_token, message: data.message || "Login successful" };
+  return { success: !!data.access_token, response: data || "Login successful" };
 }
 
 export async function registerUser({ name, username, password }) {
@@ -17,6 +17,6 @@ export async function registerUser({ name, username, password }) {
     body: JSON.stringify({ name, username, password }),
   });
   const data = await res.json();
-  console.log("Register response:", data);
-  return { success: !!data.uid, message: data.message || "User created successfully" };
+  // console.log("Register response:", data);
+  return { success: !!data.access_token, response: data || "User created successfully" };
 }
