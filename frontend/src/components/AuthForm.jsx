@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser } from '../api/user';
 
@@ -7,6 +7,12 @@ export default function AuthForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', username: '', password: '' });
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/home");
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
