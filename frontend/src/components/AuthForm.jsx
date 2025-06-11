@@ -24,7 +24,7 @@ export default function AuthForm() {
       const res = isRegistering
         ? await registerUser(formData)
         : await loginUser(formData);
-      console.log("Response:", res);
+      // console.log("Response:", res);
       if (res.success) {
         const token = res.response.access_token;
         // store the token in localStorage
