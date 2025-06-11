@@ -29,6 +29,7 @@ export default function AuthForm() {
         const token = res.response.access_token;
         // store the token in localStorage
         localStorage.setItem("token", token);
+        localStorage.setItem("userId", res.response.uid);
         navigate("/home");
         if (isRegistering) setIsRegistering(false);
       } else {

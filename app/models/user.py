@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
+from sqlalchemy.orm import Mapped 
 
 if TYPE_CHECKING:
     from .room import Room,RoomMembership
@@ -12,6 +13,4 @@ class Users(SQLModel, table=True):
     password_hash: str
     name: str
 
-    rooms: List["Room"] = Relationship(back_populates="users", link_model=RoomMembership)
-
-    
+    rooms: Mapped[List["Room"]] = Relationship(back_populates="users", link_model=RoomMembership)

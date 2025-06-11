@@ -20,3 +20,31 @@ export async function registerUser({ name, username, password }) {
   // console.log("Register response:", data);
   return { success: !!data.access_token, response: data || "User created successfully" };
 }
+
+export async function getUsers(token) {
+  const res = await fetch(`${BASE_URL}/user/users`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch users");
+  }
+  return res.json();
+}
+
+export async function getRoom(token, userId) {
+  const res = await fetch(`${BASE_URL}/user/get_room/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch room");
+  }
+  res.json().then(data => console.log("Room id:", data.room_id));
+}
