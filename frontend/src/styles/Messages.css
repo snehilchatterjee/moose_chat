@@ -1,0 +1,58 @@
+/* Messages.css */
+
+.messages-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #2b2b2b;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Optional: simulate messages from self vs others */
+.message-item {
+  padding: 10px 14px;
+  border-radius: 18px;
+  max-width: 75%;
+  word-wrap: break-word;
+  font-size: 16px;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* Message from others */
+.message-item {
+  background-color: #ffffff;
+  align-self: flex-start;
+  border: 1px solid #ddd;
+}
+
+/* Message from self (you can customize this by comparing sender) */
+.message-item.self {
+  background-color: #d6d6d6;
+  align-self: flex-end;
+  border: 1px solid #b2e59f;
+}
+
+/* Sender name styling */
+.message-item strong {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 4px;
+}

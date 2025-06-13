@@ -66,8 +66,5 @@ export async function getRoom(token, userId) {
   // res.json().then(data => console.log("Room id:", data.room_id));
   // console.log(getMessages)
   const data= await res.json();
-  getMessages(token, data.room_id).then(messages => {
-    console.log("Messages in room:", messages);
-  });
+  return data.room_id;
 }
-
