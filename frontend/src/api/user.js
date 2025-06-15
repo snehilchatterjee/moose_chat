@@ -1,7 +1,10 @@
-const BASE_URL = "http://127.0.0.1:8000/api/v1";
+export const API_URL = "127.0.0.1:8000";
+export const BASE_URL = `http://${API_URL}/api/v1`;
+export const WS_URL = `ws://${API_URL}/api/v1/ws`;
 
 export async function loginUser({ username, password }) {
-  const res = await fetch(`http://127.0.0.1:8000/auth/token`, {
+  console.log(`${API_URL}/auth/token`);
+  const res = await fetch(`http://${API_URL}/auth/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ username, password }),

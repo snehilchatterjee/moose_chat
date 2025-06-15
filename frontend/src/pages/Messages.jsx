@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getMessages,send_message } from "../api/user";
+import { getMessages,send_message, WS_URL } from "../api/user";
 import { useLocation } from "react-router-dom";
 import "../styles/Messages.css";
 
@@ -18,7 +18,7 @@ export default function Messages() {
 
         // Only create a new WebSocket if one doesn't already exist
         if (!ws.current) {
-            ws.current = new WebSocket(`ws://localhost:8000/api/v1/ws?token=${token}&room_id=${roomId}`);
+            ws.current = new WebSocket(`${WS_URL}?token=${token}&room_id=${roomId}`);
 
             ws.current.onopen = () => {
                 console.log("WebSocket connection established");
