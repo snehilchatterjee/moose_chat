@@ -5,9 +5,10 @@ from app.schema.user import UserCreate
 from app.core.crypto import hash_password
 from app.models import Users, RoomMembership, Room, Message
 from app.schema.user import UserResponse
+from app.schema.message import MessageSend
 from app.db.session import get_session
 from sqlmodel import select
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, asc
 from sqlalchemy.orm import selectinload
 
 router = APIRouter()
@@ -87,29 +88,29 @@ async def get_messages(room_id: int, current_user: Users = Depends(get_current_u
     
     messages = (await session.exec(
         select(Message).where(Message.room_id == room_id)
-        .order_by(desc(Message.timestamp))
+        .order_by(asc(Message.timestamp))
     )).all()
     if not messages:
         raise HTTPException(status_code=404, detail="No messages found in this room")
     
     return messages
 
-@router.post("/send_message/{room_id}")
-async def send_message(room_id: int, message: str, current_user: Users = Depends(get_current_user), session=Depends(get_session)):
+@router.post("/send_message")
+async def send_message(message: MessageSend, current_user: Users = Depends(get_current_user), session=Depends(get_session)):
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     if not message:
         raise HTTPException(status_code=400, detail="Message cannot be empty")
-    
-    room = (await session.exec(select(Room).where(Room.id == room_id))).first()
+
+    room = (await session.exec(select(Room).where(Room.id == message.room_id))).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     
     if current_user.id is None:
         raise HTTPException(status_code=400, detail="Invalid user ID")
-    
-    new_message = Message(room_id=room_id, user_id=current_user.id, content=message)
+
+    new_message = Message(room_id=room.id, user_id=current_user.id, content=message.content)
     session.add(new_message)
     await session.commit()
     

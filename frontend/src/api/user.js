@@ -68,3 +68,27 @@ export async function getRoom(token, userId) {
   const data= await res.json();
   return data.room_id;
 }
+
+
+export async function send_message(token, message) {
+  const res = await fetch(`${BASE_URL}/user/send_message/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      room_id: message.room_id,
+      content: message.content
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error("Send message error:", data?.detail);
+    throw new Error("Message sending failed");
+  }
+
+  return data;
+}
