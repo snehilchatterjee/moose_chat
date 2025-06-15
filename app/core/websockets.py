@@ -6,8 +6,6 @@ from typing import List
 
 router=APIRouter()
 
-# A simple connection manager to keep track of active WebSocket connections
-# sample: Dictionary[int, dict[List[WebSocket]]] where the key is the room_id and the value is a dict of WebSocket connections where key will be the user_id
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[int, dict[int, WebSocket]] = {}
