@@ -11,6 +11,41 @@ export default function Messages() {
     const currentUser = localStorage.getItem("userId");
     const bottomRef = useRef(null);
 
+    const ws = useRef(null); // Create a ref to hold the WebSocket
+
+    useEffect(() => {
+        if (!token || !roomId) return;
+
+        // Only create a new WebSocket if one doesn't already exist
+        if (!ws.current) {
+            ws.current = new WebSocket(`ws://localhost:8000/api/v1/ws?token=${token}&room_id=${roomId}`);
+
+            ws.current.onopen = () => {
+                console.log("WebSocket connection established");
+            };
+
+            ws.current.onclose = () => {
+                console.log("WebSocket connection closed");
+            };
+
+            ws.current.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("WebSocket message received:", data);
+                if (data.room_id === parseInt(roomId)) {
+                    setMessages((prevMessages) => [...prevMessages, data]);
+                }
+            };
+        }
+
+        // The cleanup function will be called when the component unmounts
+        return () => {
+            if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+                console.log("Closing WebSocket connection");
+                ws.current.close();
+            }
+        };
+    }, [token, roomId]);
+
 
     useEffect(() => {
         if (!token || !roomId) {
@@ -38,9 +73,6 @@ export default function Messages() {
         }, [messages]);
 
 
-    // websocket connection can be added here for real-time updates
-    
-    
     const sendMessage = () => {
         const input = document.querySelector(".input-container input");
         const messageContent = input.value.trim();

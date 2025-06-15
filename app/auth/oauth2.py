@@ -12,11 +12,11 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 
 router=APIRouter()
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+ACCESS_TOKEN_EXPIRE_MINUTES=300
 
 oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-async def authenticate_user(username: str,password: str,session: AsyncSession):
+async def authenticate_user(username: str,password: str,session: AsyncSession) :
     user=(await session.exec(select(Users).where(Users.username==username))).first()
     if not user:
         return None
@@ -58,29 +58,35 @@ async def get_current_user(token: str=Depends(oauth2_scheme),session: AsyncSessi
 
 async def verify_token(token: str) -> Users:
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials or user not found",
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Invalid or expired token",
     )
-    
+
     session_generator = get_session()
-    session: AsyncSession = await session_generator.__anext__() # Get the session object
+    session: AsyncSession = await session_generator.__anext__()
 
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]) # Pass ALGORITHM as a list
-        username: str = payload.get("sub")
-        password_hash=payload.get("pwd_hash")
-        auth_result = await authenticate_user(username, password_hash, session)
-        if not auth_result:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        username = payload.get("sub")
+        pwd_hash = payload.get("pwd_hash")
+
+        if username is None or pwd_hash is None:
             raise credentials_exception
-        user, _ = auth_result
+
+        user = (await session.exec(select(Users).where(Users.username == username))).first()
+        if user is None or user.password_hash != pwd_hash:
+            raise credentials_exception
+
         return user
+
     except InvalidTokenError:
         raise credentials_exception
+
     finally:
         try:
             await session_generator.aclose()
         except StopAsyncIteration:
-            pass 
+            pass
   
 
 @router.post("/token",response_model=Token)

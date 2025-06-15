@@ -11,6 +11,8 @@ from sqlmodel import select
 from sqlalchemy import func, desc, asc
 from sqlalchemy.orm import selectinload
 
+from app.core.websockets import manager 
+
 router = APIRouter()
 
 @router.get("/users",response_model=list[UserResponse])
@@ -113,5 +115,16 @@ async def send_message(message: MessageSend, current_user: Users = Depends(get_c
     new_message = Message(room_id=room.id, user_id=current_user.id, content=message.content)
     session.add(new_message)
     await session.commit()
-    
+
+    await manager.send(
+        {
+            "type": "message",
+            "content": message.content,
+            "user_id": current_user.id,
+            "room_id": room.id
+        },
+        room_id=room.id,
+        current_user_id=current_user.id
+    )
+
     return {"message": "Message sent successfully", "message_id": new_message.id}
