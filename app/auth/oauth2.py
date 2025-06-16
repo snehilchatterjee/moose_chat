@@ -5,9 +5,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from datetime import timedelta, timezone, datetime 
 from app.models.user import Users
 from sqlmodel import select
-from app.core.crypto import verify_hash
+from app.core.crypto import verify_hash, hash_password
 from app.core.config import settings
 from app.db.session import get_session
+from app.schema.user import PasswordUpdate
 import jwt
 from jwt.exceptions import InvalidTokenError
 
@@ -100,3 +101,22 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm=Depends(),
         data={"sub":user.username, "pwd_hash":password_hash}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token,token_type="bearer",uid=user.id)
+
+@router.post("/change_password")
+async def  change_password(
+    password_update: PasswordUpdate,
+    session=Depends(get_session)
+):
+    username=password_update.username
+    current_user = (await session.exec(select(Users).where(Users.username == username))).first()
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_hash(password_update.old_password, current_user.password_hash):
+        raise HTTPException(status_code=403, detail="Old password is incorrect")
+
+    current_user.password_hash = hash_password(password_update.new_password)
+    session.add(current_user)
+    await session.commit()
+
+    return {"message": "Password changed successfully"}
