@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.routing import APIRouter
 from app.auth.oauth2 import get_current_user, login_for_access_token
 from app.schema.user import UserCreate
@@ -10,6 +10,7 @@ from app.db.session import get_session
 from sqlmodel import select
 from sqlalchemy import func, desc, asc
 from sqlalchemy.orm import selectinload
+from datetime import datetime
 
 from app.core.websockets import manager 
 
@@ -84,18 +85,29 @@ async def get_room(user_id: int, current_user: Users = Depends(get_current_user)
     
 
 @router.get('/get_messages/{room_id}')
-async def get_messages(room_id: int, current_user: Users = Depends(get_current_user), session=Depends(get_session)):
+async def get_messages(
+    room_id: int,
+    limit: int = Query(20, gt=0),
+    before: datetime = Query(None),
+    current_user: Users = Depends(get_current_user),
+    session=Depends(get_session)
+):
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    messages = (await session.exec(
-        select(Message).where(Message.room_id == room_id)
-        .order_by(asc(Message.timestamp))
-    )).all()
-    if not messages:
-        raise HTTPException(status_code=404, detail="No messages found in this room")
-    
-    return messages
+
+    query = select(Message).where(Message.room_id == room_id)
+
+    if before:
+        # Fetch messages older than the provided timestamp
+        query = query.where(Message.timestamp < before)
+
+    query = query.order_by(desc(Message.timestamp)).limit(limit)
+
+    results = (await session.exec(query)).all()
+
+    # Reverse to show oldest to newest in frontend
+    return list(reversed(results))
+
 
 @router.post("/send_message")
 async def send_message(message: MessageSend, current_user: Users = Depends(get_current_user), session=Depends(get_session)):
