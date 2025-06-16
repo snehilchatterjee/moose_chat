@@ -8,7 +8,6 @@ from sqlmodel import select
 from app.core.crypto import verify_hash, hash_password
 from app.core.config import settings
 from app.db.session import get_session
-from app.schema.user import PasswordUpdate
 import jwt
 from jwt.exceptions import InvalidTokenError
 
@@ -104,18 +103,21 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm=Depends(),
 
 @router.post("/change_password")
 async def  change_password(
-    password_update: PasswordUpdate,
+    old_password: str,
+    new_password: str,
+    current_user: Users = Depends(get_current_user),
     session=Depends(get_session)
 ):
-    username=password_update.username
-    current_user = (await session.exec(select(Users).where(Users.username == username))).first()
     if not current_user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    if not old_password or not new_password:
+        raise HTTPException(status_code=400, detail="Old and new passwords are required")
 
-    if not verify_hash(password_update.old_password, current_user.password_hash):
+    if not verify_hash(old_password, current_user.password_hash):
         raise HTTPException(status_code=403, detail="Old password is incorrect")
 
-    current_user.password_hash = hash_password(password_update.new_password)
+    current_user.password_hash = hash_password(new_password)
     session.add(current_user)
     await session.commit()
 

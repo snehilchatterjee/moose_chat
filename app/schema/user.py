@@ -12,8 +12,3 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True  # This allows Pydantic to read data from SQLAlchemy models
-
-class PasswordUpdate(BaseModel):
-    old_password: str
-    new_password: str
-    username: str
