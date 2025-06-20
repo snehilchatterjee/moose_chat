@@ -4,12 +4,12 @@ import AuthForm from '../components/AuthForm'; // ✅ Not {AuthForm}
 
 export default function AuthPage() {
   return (
-    <>
+    <div className="page-transition">
       <Header />
       <main>
         <AuthForm />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

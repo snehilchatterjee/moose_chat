@@ -42,22 +42,50 @@ export default function AuthForm() {
 
   return (
     <section id="login-section">
-      <h2 style={{ color: "aliceblue" }}>{isRegistering ? "Register" : "Login"}</h2>
+      <h2>{isRegistering ? "Create Account" : "Welcome Back"}</h2>
       <form onSubmit={handleSubmit} id="login-form">
         {isRegistering && (
           <>
-            <label htmlFor="name">Name:</label>
-            <input name="name" value={formData.name} onChange={handleChange} required />
+            <label htmlFor="name">Full Name</label>
+            <input 
+              name="name" 
+              value={formData.name} 
+              onChange={handleChange} 
+              placeholder="Enter your full name"
+              required 
+            />
           </>
         )}
-        <label htmlFor="username">Username:</label>
-        <input name="username" value={formData.username} onChange={handleChange} required />
-        <label htmlFor="password">Password:</label>
-        <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-        <button style={{ margin: "10px 0" }} type="submit">{isRegistering ? "Create Account" : "Login"}</button>
-        {error && <span style={{ color: "red", alignSelf: "center", margin: "10px 0" }}>{error}</span>}
+        <label htmlFor="username">Username</label>
+        <input 
+          name="username" 
+          value={formData.username} 
+          onChange={handleChange} 
+          placeholder="Enter your username"
+          required 
+        />
+        <label htmlFor="password">Password</label>
+        <input 
+          type="password" 
+          name="password" 
+          value={formData.password} 
+          onChange={handleChange} 
+          placeholder="Enter your password"
+          required 
+        />
+        <button type="submit">
+          {isRegistering ? "Create Account" : "Sign In"}
+        </button>
+        {error && <div className="error-message">{error}</div>}
         {!isRegistering && (
-          <button type="button" onClick={() => setIsRegistering(true)}>Create an account</button>
+          <button type="button" className="btn-secondary" onClick={() => setIsRegistering(true)}>
+            New here? Create an account
+          </button>
+        )}
+        {isRegistering && (
+          <button type="button" className="btn-secondary" onClick={() => setIsRegistering(false)}>
+            Already have an account? Sign in
+          </button>
         )}
       </form>
     </section>

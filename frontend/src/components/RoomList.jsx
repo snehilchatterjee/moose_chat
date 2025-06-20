@@ -54,11 +54,21 @@ export default function RoomList() {
       </button>
 
       <ul className="user-list">
-        {users.map((user) => (
-          <li key={user.id}>
-            <button className="user-button" onClick={() => handleRoom(user.id)}>{user.name}</button>
-          </li>
-        ))}
+        {users.length === 0 ? (
+          <div className="no-users">
+            <p>👥 No other users found</p>
+            <p>Invite friends to start chatting!</p>
+          </div>
+        ) : (
+          users.map((user) => (
+            <li key={user.id}>
+              <button className="user-button" onClick={() => handleRoom(user.id)}>
+                <span className="user-icon">💬</span>
+                <span className="user-name">{user.name}</span>
+              </button>
+            </li>
+          ))
+        )}
       </ul>
     </div>
     </>

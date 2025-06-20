@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { getMessages,send_message, WS_URL } from "../api/user";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/Messages.css";
 
 export default function Messages() {
     const [messages, setMessages] = useState([]);
+    const [otherUserName, setOtherUserName] = useState("Chat");
     const token = localStorage.getItem("token");
     const location = useLocation();
+    const navigate = useNavigate();
     const roomId = location.state?.roomId;
     const currentUser = localStorage.getItem("userId");
     const bottomRef = useRef(null);
@@ -100,16 +102,32 @@ export default function Messages() {
             });
         };
 
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    };
+
+    const goBack = () => {
+        navigate('/home');
+    };
 
     return (
-        <div className="messages-container">
+        <div className="messages-container page-transition">
+            <div className="messages-header">
+                <button className="back-button" onClick={goBack}>
+                    ← Back
+                </button>
+                <h2>💬 {otherUserName}</h2>
+            </div>
+            
             <ul className="message-list">
                 {messages.map((message) => (
                     <li
                     key={message.id}
                     className={`message-item ${message.user_id == currentUser ? "self" : ""}`}
                     >
-                    <strong>{message.user_id == currentUser ? "" : `User ${message.user_id}:`}</strong>
+                    <strong>{message.user_id == currentUser ? "" : `User ${message.user_id}`}</strong>
                     {message.content}
                     </li>
                 ))}
@@ -117,8 +135,14 @@ export default function Messages() {
             </ul>
 
             <div className="input-container">
-                <input type="text" placeholder="Type your message..." />
-                <button className="send-button" onClick={() => sendMessage()}>Send</button>
+                <input 
+                    type="text" 
+                    placeholder="Type your message..." 
+                    onKeyPress={handleKeyPress}
+                />
+                <button className="send-button" onClick={() => sendMessage()}>
+                    Send
+                </button>
             </div>
         </div>
     );

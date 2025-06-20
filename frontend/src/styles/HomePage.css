@@ -1,56 +1,265 @@
-.home-container {
-  padding: 20px;
-  font-family: sans-serif;
-  background-color: black;
+/* Home Page Styles */
+.home-page {
   min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+  padding: 60px 20px;
+  text-align: center;
   color: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.moose-emoji {
+  font-size: 4rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+.welcome-message {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 15px 30px;
+  border-radius: 50px;
+  display: inline-block;
+  font-size: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.username {
+  font-weight: 600;
+  color: #ffd700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.main-content {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.chat-section {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.section-description {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+/* Room List Container Styles */
+.home-container {
+  padding: 0;
+  background: transparent;
+  min-height: auto;
+  color: inherit;
   text-align: center;
 }
 
 .title {
-  font-size: 2rem;
-  margin-bottom: 16px;
-  font-weight: bold;
+  display: none; /* Hide the old title since we have a new hero */
 }
 
 .logout-button {
-  margin: 10px 0;
-  padding: 8px 16px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  margin: 0;
+  padding: 12px 24px;
   cursor: pointer;
-  background-color: #b71c1c;
+  background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
   color: white;
   border: none;
-  border-radius: 4px;
-  width: 200px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(238, 90, 90, 0.4);
+  z-index: 1000;
 }
 
 .logout-button:hover {
-  background-color: #c62828;
+  background: linear-gradient(45deg, #ff5252, #e53e3e);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(238, 90, 90, 0.6);
 }
 
 .user-list {
   list-style-type: none;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .user-button {
-  padding: 8px 16px;
+  padding: 20px 30px;
   cursor: pointer;
-  background-color: #1976d2;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  width: 200px;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.user-icon {
+  font-size: 1.3rem;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.no-users {
+  grid-column: 1 / -1;
+  padding: 40px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+.no-users p:first-child {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.no-users p:last-child {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.user-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.user-button:hover::before {
+  left: 100%;
 }
 
 .user-button:hover {
-  background-color: #1565c0;
+  background: linear-gradient(135deg, #43a3f5 0%, #00e4ff 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+}
+
+.user-button:active {
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .moose-emoji {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .main-content {
+    padding: 40px 15px;
+  }
+  
+  .chat-section {
+    padding: 30px 20px;
+    border-radius: 15px;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .user-list {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .logout-button {
+    top: 15px;
+    right: 15px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
 }
