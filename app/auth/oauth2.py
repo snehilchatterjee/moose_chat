@@ -99,4 +99,4 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm=Depends(),
     access_token: str=create_access_token(
         data={"sub":user.username, "pwd_hash":password_hash}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token,token_type="bearer",uid=user.id)
+    return Token(access_token=access_token,token_type="bearer",uid=user.id,name=user.name,username=user.username)

@@ -9,6 +9,7 @@ export default function Messages() {
     const [loadingOlder, setLoadingOlder] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [showLoadButton, setShowLoadButton] = useState(false);
+    const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
     const token = localStorage.getItem("token");
     const location = useLocation();
     const navigate = useNavigate();
@@ -17,8 +18,16 @@ export default function Messages() {
     const bottomRef = useRef(null);
     const messageListRef = useRef(null);
 
+    const otherUserFromState = location.state?.otherUserName;
+
     const ws = useRef(null); // Create a ref to hold the WebSocket
     const earliestMessageTime = messages.length > 0 ? messages[0].timestamp : null;
+
+    useEffect(() => {
+        if (otherUserFromState) {
+            setOtherUserName(otherUserFromState);
+        }
+    }, [otherUserFromState]);
 
 
     useEffect(() => {
@@ -41,6 +50,7 @@ export default function Messages() {
                 console.log("WebSocket message received:", data);
                 if (data.room_id === parseInt(roomId)) {
                     setMessages((prevMessages) => [...prevMessages, data]);
+                    setShouldScrollToBottom(true); // Scroll to bottom for new messages
                 }
             };
         }
@@ -66,6 +76,7 @@ export default function Messages() {
             const response = await getMessages(token, roomId);
             console.log(response);
             setMessages(response);
+            setShouldScrollToBottom(true); // Scroll to bottom for initial load
         } catch (error) {
             console.error("Error fetching messages:", error);
         }
@@ -75,10 +86,11 @@ export default function Messages() {
     }, [token, roomId]);
 
     useEffect(() => {
-        if (bottomRef.current) {
+        if (shouldScrollToBottom && bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: "smooth" });
+            setShouldScrollToBottom(false); // Reset the flag
         }
-    }, [messages]);
+    }, [messages, shouldScrollToBottom]);
 
     // Handle scroll to show/hide load button
     useEffect(() => {
@@ -101,10 +113,26 @@ export default function Messages() {
         if (!earliestMessageTime || loadingOlder) return;
 
         setLoadingOlder(true);
+        
+        // Store current scroll position and height before loading
+        const messageList = messageListRef.current;
+        const scrollTop = messageList.scrollTop;
+        const scrollHeight = messageList.scrollHeight;
+        
         try {
             const response = await getMessages(token, roomId, earliestMessageTime);
-            if (response.length === 0) setHasMore(false); // No more messages
-            setMessages((prev) => [...response, ...prev]);
+            if (response.length === 0) {
+                setHasMore(false); // No more messages
+            } else {
+                setMessages((prev) => [...response, ...prev]);
+                
+                // Restore scroll position after DOM update
+                setTimeout(() => {
+                    const newScrollHeight = messageList.scrollHeight;
+                    const heightDifference = newScrollHeight - scrollHeight;
+                    messageList.scrollTop = scrollTop + heightDifference;
+                }, 0);
+            }
         } catch (error) {
             console.error("Error loading older messages:", error);
         }
@@ -132,6 +160,7 @@ export default function Messages() {
                 id: data.message_id   // Use the real ID returned by backend
                 }
             ]);
+            setShouldScrollToBottom(true); // Scroll to bottom for sent messages
             input.value = "";
             })
             .catch((error) => {
@@ -175,7 +204,7 @@ export default function Messages() {
                         key={message.id}
                         className={`message-item ${message.user_id == currentUser ? "self" : ""}`}
                         >
-                        <strong>{message.user_id == currentUser ? "" : `User ${message.user_id}`}</strong>
+                        <strong>{message.user_id == currentUser ? "" : `${otherUserName}`}</strong>
                         {message.content}
                         </li>
                     ))}

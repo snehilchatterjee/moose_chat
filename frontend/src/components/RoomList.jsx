@@ -34,11 +34,12 @@ export default function RoomList() {
         window.location.href = "/";
     };
 
-    const handleRoom = async (userId) => {
+    const handleRoom = async (userId,name) => {
         try {
+          
             const roomId = await getRoom(token, userId);
             console.log("Room ID:", roomId);
-            navigate('/messages', { state: { roomId } });
+            navigate('/messages', { state: { roomId, otherUserName: name } });
         } catch (error) {
         console.error("Error fetching messages:", error);
         }
@@ -62,7 +63,7 @@ export default function RoomList() {
         ) : (
           users.map((user) => (
             <li key={user.id}>
-              <div className="user-card" onClick={() => handleRoom(user.id)}>
+              <div className="user-card" onClick={() => handleRoom(user.id,user.name)}>
                 <div className="user-avatar">
                   <span className="avatar-text">{user.name.charAt(0).toUpperCase()}</span>
                 </div>

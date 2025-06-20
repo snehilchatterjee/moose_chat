@@ -30,6 +30,7 @@ export default function AuthForm() {
         // store the token in localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("userId", res.response.uid);
+        localStorage.setItem("username", res.response.username);
         navigate("/home");
         if (isRegistering) setIsRegistering(false);
       } else {
