@@ -62,10 +62,18 @@ export default function RoomList() {
         ) : (
           users.map((user) => (
             <li key={user.id}>
-              <button className="user-button" onClick={() => handleRoom(user.id)}>
-                <span className="user-icon">💬</span>
-                <span className="user-name">{user.name}</span>
-              </button>
+              <div className="user-card" onClick={() => handleRoom(user.id)}>
+                <div className="user-avatar">
+                  <span className="avatar-text">{user.name.charAt(0).toUpperCase()}</span>
+                </div>
+                <div className="user-info">
+                  <h3 className="user-name">{user.name}</h3>
+                  <p className="user-status">💬 Start a conversation</p>
+                </div>
+                <div className="user-action">
+                  <span className="action-icon">→</span>
+                </div>
+              </div>
             </li>
           ))
         )}

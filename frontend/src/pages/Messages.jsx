@@ -6,14 +6,20 @@ import "../styles/Messages.css";
 export default function Messages() {
     const [messages, setMessages] = useState([]);
     const [otherUserName, setOtherUserName] = useState("Chat");
+    const [loadingOlder, setLoadingOlder] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [showLoadButton, setShowLoadButton] = useState(false);
     const token = localStorage.getItem("token");
     const location = useLocation();
     const navigate = useNavigate();
     const roomId = location.state?.roomId;
     const currentUser = localStorage.getItem("userId");
     const bottomRef = useRef(null);
+    const messageListRef = useRef(null);
 
     const ws = useRef(null); // Create a ref to hold the WebSocket
+    const earliestMessageTime = messages.length > 0 ? messages[0].timestamp : null;
+
 
     useEffect(() => {
         if (!token || !roomId) return;
@@ -72,7 +78,38 @@ export default function Messages() {
         if (bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: "smooth" });
         }
-        }, [messages]);
+    }, [messages]);
+
+    // Handle scroll to show/hide load button
+    useEffect(() => {
+        const messageList = messageListRef.current;
+        if (!messageList) return;
+
+        const handleScroll = () => {
+            const scrollTop = messageList.scrollTop;
+            const threshold = 100; // Show button when scrolled up more than 100px from top
+            
+            // Only show button if there are more messages to load and user scrolled up
+            setShowLoadButton(hasMore && scrollTop < threshold && messages.length > 0);
+        };
+
+        messageList.addEventListener('scroll', handleScroll);
+        return () => messageList.removeEventListener('scroll', handleScroll);
+    }, [hasMore, messages.length]);
+
+    const handleLoadOlderMessages = async () => {
+        if (!earliestMessageTime || loadingOlder) return;
+
+        setLoadingOlder(true);
+        try {
+            const response = await getMessages(token, roomId, earliestMessageTime);
+            if (response.length === 0) setHasMore(false); // No more messages
+            setMessages((prev) => [...response, ...prev]);
+        } catch (error) {
+            console.error("Error loading older messages:", error);
+        }
+        setLoadingOlder(false);
+    };
 
 
     const sendMessage = () => {
@@ -113,36 +150,48 @@ export default function Messages() {
     };
 
     return (
-        <div className="messages-container page-transition">
-            <div className="messages-header">
-                <button className="back-button" onClick={goBack}>
-                    ← Back
-                </button>
-                <h2>💬 {otherUserName}</h2>
-            </div>
-            
-            <ul className="message-list">
-                {messages.map((message) => (
-                    <li
-                    key={message.id}
-                    className={`message-item ${message.user_id == currentUser ? "self" : ""}`}
+        <div className="messages-page-container">
+            <div className="messages-container page-transition">
+                <div className="messages-header">
+                    <button className="back-button" onClick={goBack}>
+                        ← Back
+                    </button>
+                    <h2>💬 {otherUserName}</h2>
+                </div>
+                
+                {showLoadButton && (
+                    <button
+                        onClick={handleLoadOlderMessages}
+                        className="load-older-btn"
+                        disabled={loadingOlder}
                     >
-                    <strong>{message.user_id == currentUser ? "" : `User ${message.user_id}`}</strong>
-                    {message.content}
-                    </li>
-                ))}
-                <div ref={bottomRef} />
-            </ul>
+                        {loadingOlder ? "Loading..." : "Load Older Messages"}
+                    </button>
+                )}
 
-            <div className="input-container">
-                <input 
-                    type="text" 
-                    placeholder="Type your message..." 
-                    onKeyPress={handleKeyPress}
-                />
-                <button className="send-button" onClick={() => sendMessage()}>
-                    Send
-                </button>
+                <ul className="message-list" ref={messageListRef}>
+                    {messages.map((message) => (
+                        <li
+                        key={message.id}
+                        className={`message-item ${message.user_id == currentUser ? "self" : ""}`}
+                        >
+                        <strong>{message.user_id == currentUser ? "" : `User ${message.user_id}`}</strong>
+                        {message.content}
+                        </li>
+                    ))}
+                    <div ref={bottomRef} />
+                </ul>
+
+                <div className="input-container">
+                    <input 
+                        type="text" 
+                        placeholder="Type your message..." 
+                        onKeyPress={handleKeyPress}
+                    />
+                    <button className="send-button" onClick={() => sendMessage()}>
+                        Send
+                    </button>
+                </div>
             </div>
         </div>
     );

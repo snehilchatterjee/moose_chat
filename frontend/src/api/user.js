@@ -39,21 +39,26 @@ export async function getUsers(token) {
 }
 
 
-export async function getMessages(token, roomId) {
-  console.log(`${BASE_URL}/user/get_messages/${roomId}`)
-  const res = await fetch(`${BASE_URL}/user/get_messages/${roomId}`, {
+export async function getMessages(token, roomId, before = null, limit = 20) {
+  const url = new URL(`${BASE_URL}/user/get_messages/${roomId}`);
+  if (before) url.searchParams.append("before", before);
+  url.searchParams.append("limit", limit);
+
+  const res = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
+
   if (!res.ok) {
     throw new Error("Failed to fetch messages");
   }
-  // res.json().then(data => console.log("Messages:", data));
   return res.json();
 }
+
+
 
 export async function getRoom(token, userId) {
   const res = await fetch(`${BASE_URL}/user/get_room/${userId}`, {
