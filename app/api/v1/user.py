@@ -98,12 +98,14 @@ async def get_messages(
     query = select(Message).where(Message.room_id == room_id)
 
     if before:
+        # Fetch messages older than the provided timestamp
         query = query.where(Message.timestamp < before)
 
-    query = query.order_by(desc(Message.timestamp)).limit(limit) # type: ignore
+    query = query.order_by(desc(Message.timestamp)).limit(limit)
 
     results = (await session.exec(query)).all()
 
+    # Reverse to show oldest to newest in frontend
     return list(reversed(results))
 
 
