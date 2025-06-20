@@ -99,3 +99,21 @@ export async function send_message(token, message) {
 
   return data;
 }
+
+export async function changePassword(token, oldPassword, newPassword) {
+  const res = await fetch(`http://${API_URL}/auth/change_password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.detail || "Failed to change password");
+  }
+
+  return res.json();
+}

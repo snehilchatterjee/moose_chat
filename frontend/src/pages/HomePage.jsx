@@ -1,11 +1,14 @@
 
 import RoomList from "../components/RoomList";
-
+import PasswordChangeButton from "../components/PasswordChangeButton";
 
 function HomePage() {
   
   return (
-    <RoomList/>
+    <>
+      <PasswordChangeButton />
+      <RoomList />
+    </>
   );
 }
 
