@@ -4,13 +4,20 @@ A **backend-focused** real-time chat application built with FastAPI, featuring W
 
 ## ✨ Features
 
-- **Real-time Messaging**: Instant message delivery using WebSocket connections
-- **User Authentication**: Secure JWT-based authentication system
-- **Room-based Chat**: Private conversations between users
+### Backend Technical Implementation
+- **OAuth2.0 + JWT Authentication**: Secure token-based authentication with refresh tokens
+- **SQLModel Integration**: Modern type-safe database operations with Pydantic validation
+- **WebSocket Communication**: Real-time bidirectional messaging for instant chat
+- **Async/Await Architecture**: Non-blocking I/O operations for high performance
+- **Room-based Chat System**: Private conversations between users
+- **Message History & Pagination**: Efficient message retrieval with timestamp-based pagination
+- **Password Security**: Bcrypt hashing with salt for secure password storage
+- **Database Migrations**: Alembic-powered schema versioning and updates
+
+### Frontend Features (AI-Generated)
 - **Responsive Design**: Modern, mobile-friendly user interface
-- **Message History**: Load and display previous messages
-- **User Management**: Register, login, and manage user accounts
-- **Password Security**: Secure password hashing and change functionality
+- **Real-time Updates**: WebSocket integration for instant message display
+- **User Management**: Registration, login, and profile management interface
 
 ## 🏗️ Architecture
 
