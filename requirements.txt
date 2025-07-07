@@ -8,3 +8,4 @@ pyjwt
 alembic
 psycopg2
 datetime
+ollama

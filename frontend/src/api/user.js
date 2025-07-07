@@ -38,6 +38,37 @@ export async function getUsers(token) {
   return res.json();
 }
 
+export async function createBotRoom(token) {
+  const res = await fetch(`${BASE_URL}/user/create_bot_room`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to create or get bot room");
+  }
+  return res.json();
+}
+
+export async function sendMessage(token, roomId, content, isBotChat = false) {
+  const endpoint = isBotChat ? '/user/chat_with_bot' : '/user/send_message';
+  const res = await fetch(`${BASE_URL}${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ room_id: roomId, content }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.detail || "Failed to send message");
+  }
+  return res.json();
+}
+
 
 export async function getMessages(token, roomId, before = null, limit = 20) {
   const url = new URL(`${BASE_URL}/user/get_messages/${roomId}`);

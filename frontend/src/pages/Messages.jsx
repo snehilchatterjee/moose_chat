@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getMessages,send_message, WS_URL } from "../api/user";
+import { getMessages, send_message, sendMessage, WS_URL } from "../api/user";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/Messages.css";
 
@@ -10,6 +10,8 @@ export default function Messages() {
     const [hasMore, setHasMore] = useState(true);
     const [showLoadButton, setShowLoadButton] = useState(false);
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+    const [isBotChat, setIsBotChat] = useState(false);
+    const [botThinking, setBotThinking] = useState(false);
     const token = localStorage.getItem("token");
     const location = useLocation();
     const navigate = useNavigate();
@@ -19,6 +21,7 @@ export default function Messages() {
     const messageListRef = useRef(null);
 
     const otherUserFromState = location.state?.otherUserName;
+    const isBotChatFromState = location.state?.isBotChat;
 
     const ws = useRef(null); // Create a ref to hold the WebSocket
     const earliestMessageTime = messages.length > 0 ? messages[0].timestamp : null;
@@ -27,7 +30,10 @@ export default function Messages() {
         if (otherUserFromState) {
             setOtherUserName(otherUserFromState);
         }
-    }, [otherUserFromState]);
+        if (isBotChatFromState) {
+            setIsBotChat(isBotChatFromState);
+        }
+    }, [otherUserFromState, isBotChatFromState]);
 
 
     useEffect(() => {
@@ -140,7 +146,7 @@ export default function Messages() {
     };
 
 
-    const sendMessage = () => {
+    const sendMessage_func = () => {
         const input = document.querySelector(".input-container input");
         const messageContent = input.value.trim();
         if (!messageContent) return;
@@ -150,27 +156,63 @@ export default function Messages() {
             room_id: parseInt(roomId)
         };
 
-        send_message(token, message)
-            .then((data) => {
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                ...message,
-                user_id: currentUser, // For local rendering only
-                id: data.message_id   // Use the real ID returned by backend
-                }
-            ]);
-            setShouldScrollToBottom(true); // Scroll to bottom for sent messages
-            input.value = "";
-            })
-            .catch((error) => {
-            console.error("Error sending message:", error);
-            });
-        };
+        // Clear input immediately for better UX
+        input.value = "";
+
+        if (isBotChat) {
+            // For bot chat, show user message immediately
+            const userMessage = {
+                content: messageContent,
+                user_id: currentUser,
+                id: Date.now(), // Temporary ID
+                timestamp: new Date().toISOString()
+            };
+            
+            setMessages((prevMessages) => [...prevMessages, userMessage]);
+            setShouldScrollToBottom(true);
+            setBotThinking(true);
+
+            // Send to bot and handle response
+            sendMessage(token, parseInt(roomId), messageContent, true)
+                .then((data) => {
+                    setBotThinking(false);
+                    // Refresh messages to get the bot response (this will include both user and bot messages)
+                    return getMessages(token, roomId).then(newMessages => {
+                        setMessages(newMessages);
+                        setShouldScrollToBottom(true);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error sending message:", error);
+                    setBotThinking(false);
+                    // Remove the optimistic message on error
+                    setMessages((prevMessages) => 
+                        prevMessages.filter(msg => msg.id !== userMessage.id)
+                    );
+                });
+        } else {
+            // For regular chat, use the original logic
+            send_message(token, message)
+                .then((data) => {
+                    setMessages((prevMessages) => [
+                        ...prevMessages,
+                        {
+                            ...message,
+                            user_id: currentUser,
+                            id: data.message_id
+                        }
+                    ]);
+                    setShouldScrollToBottom(true);
+                })
+                .catch((error) => {
+                    console.error("Error sending message:", error);
+                });
+        }
+    };
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            sendMessage();
+            sendMessage_func();
         }
     };
 
@@ -199,15 +241,33 @@ export default function Messages() {
                 )}
 
                 <ul className="message-list" ref={messageListRef}>
-                    {messages.map((message) => (
-                        <li
-                        key={message.id}
-                        className={`message-item ${message.user_id == currentUser ? "self" : ""}`}
-                        >
-                        <strong>{message.user_id == currentUser ? "" : `${otherUserName}`}</strong>
-                        {message.content}
+                    {messages.map((message) => {
+                        const isCurrentUser = message.user_id == currentUser;
+                        const isBotMessage = isBotChat && !isCurrentUser;
+                        
+                        return (
+                            <li
+                                key={message.id}
+                                className={`message-item ${isCurrentUser ? "self" : ""} ${isBotMessage ? "bot-message" : ""}`}
+                            >
+                                <strong>
+                                    {isCurrentUser ? "" : isBotMessage ? "🤖 " : `${otherUserName}: `}
+                                </strong>
+                                {message.content}
+                            </li>
+                        );
+                    })}
+                    
+                    {botThinking && (
+                        <li className="message-item bot-message bot-thinking">
+                            <strong>🤖 </strong>
+                            <span className="thinking-dots">
+                                <span>.</span><span>.</span><span>.</span>
+                            </span>
+                            <span style={{marginLeft: '10px', fontStyle: 'italic', opacity: 0.7}}>thinking...</span>
                         </li>
-                    ))}
+                    )}
+                    
                     <div ref={bottomRef} />
                 </ul>
 
@@ -217,7 +277,7 @@ export default function Messages() {
                         placeholder="Type your message..." 
                         onKeyPress={handleKeyPress}
                     />
-                    <button className="send-button" onClick={() => sendMessage()}>
+                    <button className="send-button" onClick={() => sendMessage_func()}>
                         Send
                     </button>
                 </div>
