@@ -45,7 +45,9 @@ async def get_current_user(token: str=Depends(oauth2_scheme),session: AsyncSessi
         payload=jwt.decode(token,settings.SECRET_KEY,settings.ALGORITHM)
         username=payload.get("sub")
         password_hash=payload.get("pwd_hash")
-        if username is None or authenticate_user(username,password_hash,session) is None:
+
+        user = (await session.exec(select(Users).where(Users.username==username))).first()
+        if username is None or user is None or user.password_hash != password_hash:
             raise credentials_exception
         token_data=TokenData(username=username)
     except InvalidTokenError:
